@@ -1,0 +1,177 @@
+-- ============================================
+-- OFFICE COMPLAINT MANAGEMENT SYSTEM
+-- FINAL DATABASE SQL QUERIES
+-- ============================================
+
+-- 1. Create Database
+CREATE DATABASE office_complaint;
+USE office_complaint;
+
+
+-- 2. Create Users Table
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    department VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
+
+
+-- 3. Create Complaints Table
+CREATE TABLE complaints (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    description TEXT NOT NULL,
+    status ENUM('Pending', 'In Progress', 'Resolved') DEFAULT 'Pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+
+-- 4. Insert Sample Users
+INSERT INTO users (name, email, department, password)
+VALUES
+('Rakibul Islam', 'rakibul@gmail.com', 'CSE', '123456'),
+('Sakib Ahmed', 'sakib@gmail.com', 'EEE', '123456'),
+('Nusrat Jahan', 'nusrat@gmail.com', 'BBA', '123456');
+
+
+-- 5. Insert Sample Complaints
+INSERT INTO complaints
+(user_id, title, category, description, status)
+VALUES
+(1, 'Computer Lab Internet Problem', 'Internet',
+ 'Internet connection is frequently disconnecting.', 'Pending'),
+
+(2, 'AC Not Working', 'Maintenance',
+ 'The air conditioner is not working properly.', 'In Progress'),
+
+(3, 'Projector Problem', 'Equipment',
+ 'The projector is not displaying properly.', 'Resolved');
+
+
+-- 6. Display All Users
+SELECT * FROM users;
+
+
+-- 7. Display All Complaints
+SELECT * FROM complaints;
+
+
+-- 8. Display Complaints with User Information
+SELECT 
+    complaints.id,
+    users.name,
+    users.department,
+    complaints.title,
+    complaints.category,
+    complaints.description,
+    complaints.status,
+    complaints.created_at
+FROM complaints
+JOIN users
+ON complaints.user_id = users.id;
+
+
+-- 9. Display Pending Complaints
+SELECT *
+FROM complaints
+WHERE status = 'Pending';
+
+
+-- 10. Display In Progress Complaints
+SELECT *
+FROM complaints
+WHERE status = 'In Progress';
+
+
+-- 11. Display Resolved Complaints
+SELECT *
+FROM complaints
+WHERE status = 'Resolved';
+
+
+-- 12. Update Complaint Status
+UPDATE complaints
+SET status = 'In Progress'
+WHERE id = 1;
+
+
+-- 13. Update Complaint Status to Resolved
+UPDATE complaints
+SET status = 'Resolved'
+WHERE id = 1;
+
+
+-- 14. Search Complaint by Title
+SELECT 
+    complaints.*,
+    users.name,
+    users.department
+FROM complaints
+JOIN users
+ON complaints.user_id = users.id
+WHERE complaints.title LIKE '%Internet%';
+
+
+-- 15. Search Complaint by User Name
+SELECT 
+    complaints.*,
+    users.name,
+    users.department
+FROM complaints
+JOIN users
+ON complaints.user_id = users.id
+WHERE users.name LIKE '%Rakibul%';
+
+
+-- 16. Count Total Complaints
+SELECT COUNT(*) AS total_complaints
+FROM complaints;
+
+
+-- 17. Count Pending Complaints
+SELECT COUNT(*) AS pending_complaints
+FROM complaints
+WHERE status = 'Pending';
+
+
+-- 18. Count In Progress Complaints
+SELECT COUNT(*) AS in_progress_complaints
+FROM complaints
+WHERE status = 'In Progress';
+
+
+-- 19. Count Resolved Complaints
+SELECT COUNT(*) AS resolved_complaints
+FROM complaints
+WHERE status = 'Resolved';
+
+
+-- 20. Delete One Complaint
+DELETE FROM complaints
+WHERE id = 1;
+
+
+-- 21. Display Department-wise Complaint Count
+SELECT 
+    users.department,
+    COUNT(complaints.id) AS total_complaints
+FROM users
+LEFT JOIN complaints
+ON users.id = complaints.user_id
+GROUP BY users.department;
+
+
+-- 22. Display Latest Complaints First
+SELECT 
+    complaints.*,
+    users.name,
+    users.department
+FROM complaints
+JOIN users
+ON complaints.user_id = users.id
+ORDER BY complaints.created_at DESC;
